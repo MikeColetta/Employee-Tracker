@@ -18,37 +18,77 @@ const connection = mysql.createConnection({
 
 const init = () => {
     inquirer
-      .prompt({
-          name: 'startmenu',
-          type: 'checkbox',
-          message: 'What would you like to do?',
-          choices: ['View All Employees', 'View All Employees By Department', 'View All Employees By Manager', 'Add Employee', 'Remove Employee', 'Update Employee Role', 'Update Employee Manager', 'View All Roles', ]
-      }).then((answer) => {
-          switch (answer.startmenu) {
-              case 'View All Employees':
-                  viewAllEmp();
-                  break;
-              case 'View All Employees By Department':
-                  viewAllEmpDept();
-                  break;
-              case 'View All Employees By Manager':
-                  viewAllEmpMan();
-                  break;
-              case 'Add Employee':
-                  addEmp();
-                  break;
-              case 'Remove Employee':
-                  remEmp();
-                  break;
-              case 'Update Employee Role':
-                  updateEmpRole();
-                  break;
-              case 'Update Employee Manager':
-                  updateEmpMan();
-                  break;
-              case 'View All Roles':
-                  viewAllRoles();
-                  break;
-          }
-      })
+        .prompt({
+            name: 'startmenu',
+            type: 'rawlist',
+            message: 'What would you like to do?',
+            choices: [
+                'View All Employees',
+                'View All Employees By Department',
+                'View All Employees By Manager',
+                'Add Employee',
+                'Remove Employee',
+                'Update Employee Role',
+                'Update Employee Manager',
+                'View All Roles'
+            ]
+        }).then((answer) => {
+            switch (answer.startmenu) {
+                case 'View All Employees':
+                    viewAllEmp();
+                    break;
+                case 'View All Employees By Department':
+                    viewAllEmpDept();
+                    break;
+                case 'View All Employees By Manager':
+                    viewAllEmpMan();
+                    break;
+                case 'Add Employee':
+                    addEmp();
+                    break;
+                case 'Remove Employee':
+                    remEmp();
+                    break;
+                case 'Update Employee Role':
+                    updateEmpRole();
+                    break;
+                case 'Update Employee Manager':
+                    updateEmpMan();
+                    break;
+                case 'View All Roles':
+                    viewAllRoles();
+                    break;
+            }
+        })
+}
+
+init();
+
+const viewAllEmp = () => {
+    connection.query('SELECT * FROM employees', (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        init();
+    });
+}
+const viewAllEmpDept = () => {
+
+}
+const viewAllEmpMan = () => {
+
+}
+const addEmp = () => {
+
+}
+const remEmp = () => {
+
+}
+const updateEmpRole = () => {
+
+}
+const updateEmpMan = () => {
+
+}
+const viewAllRoles = () => {
+
 }
