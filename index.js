@@ -37,11 +37,11 @@ const init = () => {
                 case 'View All Employees':
                     viewAllEmp();
                     break;
-                case 'View All Employees By Department':
-                    viewAllEmpDept();
+                case 'View All Departments':
+                    viewAllDepts();
                     break;
-                case 'View All Employees By Manager':
-                    viewAllEmpMan();
+                case 'View All Manager':
+                    viewAllRoles();
                     break;
                 case 'Add Employee':
                     addEmp();
@@ -71,17 +71,49 @@ const viewAllEmp = () => {
         init();
     });
 }
-const viewAllEmpDept = () => {
+const viewAllDepts = () => {
+    connection.query('SELECT * FROM departments', (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        init();
+    });
 
 }
-const viewAllEmpMan = () => {
+const viewAllRoles = () => {
+    connection.query('SELECT * FROM roles', (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        init();
+    });
 
 }
 const addEmp = () => {
 
 }
-const remEmp = () => {
+const remEmp = (answer) => {
+    inquirer
+    .prompt({
+        name: 'delEmp',
+        type: 'input',
+        message: 'Which employee would you like to remove?',            
+    })
+    .then(answer.delEmp)
 
+    console.log('Deleting employee...\n');
+    connection.query(
+      'DELETE FROM songs WHERE ?',
+      {
+        first_name: answer.delEmp,
+      },
+      (err, res) => {
+        if (err) {
+            console.log('Employee not in database!')
+            init();
+        };
+        console.log(`${res} employee deleted!\n`);
+        init();
+      }
+    )
 }
 const updateEmpRole = () => {
 
