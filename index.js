@@ -85,42 +85,66 @@ const viewAllRoles = () => {
         console.table(res);
         init();
     });
-
 }
+
 const addEmp = () => {
-
-}
-const remEmp = (answer) => {
-    inquirer
-    .prompt({
-        name: 'delEmp',
+    inquirer.prompt([
+        {
+        name: 'firstName',
         type: 'input',
-        message: 'Which employee would you like to remove?',            
-    })
-    .then(answer.delEmp)
+        message: "What is the new employee's first name?"
+        },
+        {
+            name: 'lastName',
+            type: 'input',
+            message: 'What is their last name?'
+        },
+        {
+            name: 'role',
+            type: 'list',
+            message: 'What is their role?',
+            choices:
+        }
+    ])
 
-    console.log('Deleting employee...\n');
-    connection.query(
-      'DELETE FROM songs WHERE ?',
-      {
-        first_name: answer.delEmp,
-      },
-      (err, res) => {
-        if (err) {
-            console.log('Employee not in database!')
-            init();
-        };
-        console.log(`${res} employee deleted!\n`);
-        init();
-      }
-    )
 }
+// const remEmp = (answer) => {
+//     connection.query("SELECT concat(first_name,' ', last_name) as fullName FROM employees", (err, res) => {
+//         if (err) throw err;
+//         let empList = [];
+//         res.forEach(element.fullName);
+//     })
+//     inquirer
+//     .prompt({
+//         name: 'delEmp',
+//         type: 'rawlist',
+//         message: 'Which employee would you like to remove?',
+//         choices: empList         
+//     })
+//     .then(answer.delEmp)
+
+//     console.log('Deleting employee...\n');
+//     connection.query(
+//       'DELETE FROM songs WHERE ?',
+//       {
+//         first_name: answer.delEmp,
+//       },
+//       (err, res) => {
+//         if (err) {
+//             console.log('Employee not in database!')
+//             init();
+//         };
+//         console.log(`${res} employee deleted!\n`);
+//         init();
+//       }
+//     )
+// }
 const updateEmpRole = () => {
 
 }
 const updateEmpMan = () => {
 
 }
-const viewAllRoles = () => {
+// const viewAllRoles = () => {
 
-}
+// }
