@@ -24,11 +24,15 @@ const init = () => {
             message: 'What would you like to do?',
             choices: [
                 'View All Employees',
-                'View All Employees By Department',
-                'View All Employees By Manager',
+                'View All Departments',
+                'View All Managers',
                 'Add Employee',
                 'Remove Employee',
+                'Add Role',
+                'Remove Role',
                 'Update Employee Role',
+                'Add Manager',
+                'Remove Manager',
                 'Update Employee Manager',
                 'View All Roles'
             ]
@@ -40,7 +44,7 @@ const init = () => {
                 case 'View All Departments':
                     viewAllDepts();
                     break;
-                case 'View All Manager':
+                case 'View All Managers':
                     viewAllRoles();
                     break;
                 case 'Add Employee':
@@ -49,6 +53,9 @@ const init = () => {
                 case 'Remove Employee':
                     remEmp();
                     break;
+                case 'Add Role':
+                    addRole();
+                    break;    
                 case 'Update Employee Role':
                     updateEmpRole();
                     break;
@@ -103,9 +110,28 @@ const addEmp = () => {
             name: 'role',
             type: 'list',
             message: 'What is their role?',
-            choices:
+            choices:[]
         }
-    ])
+    ]).then((answers) => {
+        let firstName = answers.firstName;
+        let lastName = answers.lastName;
+        let role = answers.role;
+        connection.query(
+            'INSERT INTO employees SET ?',
+            {
+                first_name: answers.firstName,
+                last_name: answers.lastName,
+                role_id: answers.role,
+                manager_id:answers.manager
+            },
+            (err, res) => {
+                if (err) throw err;
+                console.log(`${response.itemName} Item added to auction!\n`);
+                init();
+            }
+        )
+
+    })
 
 }
 // const remEmp = (answer) => {
@@ -139,6 +165,45 @@ const addEmp = () => {
 //       }
 //     )
 // }
+const addRole = () => {
+    inquirer.prompt([
+        {
+        name: 'title',
+        type: 'input',
+        message: "What is the title of the new role?"
+        },
+        {
+            name: 'salary',
+            type: 'input',
+            message: 'What is their salary?'
+        },
+        {
+            name: 'department',
+            type: 'input',
+            message: 'What is their department?',
+        }
+    ]).then((answers) => {
+        let title = answers.title;
+        let salary = answers.salary;
+        let department = answers.department;
+        connection.query(
+            'INSERT INTO role SET ?',
+            {
+                title: title,
+                salary: salary,
+                department_id: department,
+            },
+            (err, res) => {
+                if (err) throw err;
+                console.log(`Role added!\n`);
+                init();
+            }
+        )
+
+    })
+
+}
+
 const updateEmpRole = () => {
 
 }
