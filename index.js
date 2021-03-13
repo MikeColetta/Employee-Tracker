@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql');
 const cTable = require('console.table');
+const { restoreDefaultPrompts } = require('inquirer');
 
 //mysql connection
 const connection = mysql.createConnection({
@@ -30,6 +31,8 @@ const init = () => {
                 'Remove Employee',
                 'Add Role',
                 'Remove Role',
+                'Add Department',
+                'Remove Department',
                 'Update Employee Role',
                 'Add Manager',
                 'Remove Manager',
@@ -55,7 +58,16 @@ const init = () => {
                     break;
                 case 'Add Role':
                     addRole();
-                    break;    
+                    break;
+                case 'Remove Role':
+                    remRole();
+                    break;
+                case 'Add Department':
+                    addDept();
+                    break;
+                case 'Remove Department':
+                    remDept();
+                    break;                        
                 case 'Update Employee Role':
                     updateEmpRole();
                     break;
@@ -72,14 +84,14 @@ const init = () => {
 init();
 
 const viewAllEmp = () => {
-    connection.query('SELECT * FROM employees', (err, res) => {
+    connection.query('SELECT * FROM employee', (err, res) => {
         if (err) throw err;
         console.table(res);
         init();
     });
 }
 const viewAllDepts = () => {
-    connection.query('SELECT * FROM departments', (err, res) => {
+    connection.query('SELECT * FROM department', (err, res) => {
         if (err) throw err;
         console.table(res);
         init();
@@ -87,7 +99,7 @@ const viewAllDepts = () => {
 
 }
 const viewAllRoles = () => {
-    connection.query('SELECT * FROM roles', (err, res) => {
+    connection.query('SELECT * FROM role', (err, res) => {
         if (err) throw err;
         console.table(res);
         init();
@@ -117,7 +129,7 @@ const addEmp = () => {
         let lastName = answers.lastName;
         let role = answers.role;
         connection.query(
-            'INSERT INTO employees SET ?',
+            'INSERT INTO employee SET ?',
             {
                 first_name: answers.firstName,
                 last_name: answers.lastName,
@@ -134,37 +146,44 @@ const addEmp = () => {
     })
 
 }
-// const remEmp = (answer) => {
-//     connection.query("SELECT concat(first_name,' ', last_name) as fullName FROM employees", (err, res) => {
-//         if (err) throw err;
-//         let empList = [];
-//         res.forEach(element.fullName);
-//     })
-//     inquirer
-//     .prompt({
-//         name: 'delEmp',
-//         type: 'rawlist',
-//         message: 'Which employee would you like to remove?',
-//         choices: empList         
-//     })
-//     .then(answer.delEmp)
+ const remEmp = () => {
+     connection.query("SELECT * FROM employee", (err, res) => {
+         if (err) throw err;
+    
+    inquirer
+    .prompt([
+        {
+        name: 'delEmp',
+        type: 'rawlist',
+        choices(){
+            const choiceArray = [];
+            res.forEach(({ id }) => {                
+                choiceArray.push(id)
+            });
+            return choiceArray;
+        },
+        message: 'Select the id of the employee you would you like to remove?',
+    },
+    ])
+    .then(answer.delEmp)
 
-//     console.log('Deleting employee...\n');
-//     connection.query(
-//       'DELETE FROM songs WHERE ?',
-//       {
-//         first_name: answer.delEmp,
-//       },
-//       (err, res) => {
-//         if (err) {
-//             console.log('Employee not in database!')
-//             init();
-//         };
-//         console.log(`${res} employee deleted!\n`);
-//         init();
-//       }
-//     )
-// }
+    console.log('Deleting employee...\n');
+    connection.query(
+      'DELETE FROM employee WHERE ?',
+      {
+        id: answer.delEmp,
+      },
+      (err, res) => {
+        if (err) {
+            console.log('Employee not in database!')
+            init();
+        };
+        console.log(`Employee deleted!\n`);
+        init();
+      }
+    )
+})
+}
 const addRole = () => {
     inquirer.prompt([
         {
@@ -180,7 +199,7 @@ const addRole = () => {
         {
             name: 'department',
             type: 'input',
-            message: 'What is their department?',
+            message: 'What is their department ID?',
         }
     ]).then((answers) => {
         let title = answers.title;
@@ -201,6 +220,38 @@ const addRole = () => {
         )
 
     })
+
+}
+
+const remRole = () => {
+
+}
+
+const addDept = () => {
+    inquirer.prompt([
+        {
+        name: 'departmentName',
+        type: 'input',
+        message: "What is the title of the new department?"
+        }
+    ]).then((answers) => {
+        let department = answers.departmentName;
+        connection.query(
+            'INSERT INTO department SET ?',
+            {
+                department_name: department
+            },
+            (err, res) => {
+                if (err) throw err;
+                console.log(`Department added!\n`);
+                init();
+            }
+        )
+
+    })
+}
+
+const remDept = () => {
 
 }
 

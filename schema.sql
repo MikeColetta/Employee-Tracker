@@ -3,7 +3,7 @@ CREATE DATABASE employeeTracker_DB;
 
 USE employeeTracker_DB;
 
-CREATE TABLE employees(
+CREATE TABLE employee(
   id INT NOT NULL AUTO_INCREMENT,
   first_name VARCHAR(30) NOT NULL,
   last_name VARCHAR(30) NOT NULL,
