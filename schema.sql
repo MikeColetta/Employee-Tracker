@@ -3,6 +3,12 @@ CREATE DATABASE employeeTracker_DB;
 
 USE employeeTracker_DB;
 
+SELECT * FROM employee WHERE first_name="Bob" AND last_name="Doe";
+
+SELECT * FROM employee;
+
+SELECT * FROM department;
+
 CREATE TABLE employee(
   id INT NOT NULL AUTO_INCREMENT,
   first_name VARCHAR(30) NOT NULL,
@@ -25,3 +31,4 @@ id INT NOT NULL AUTO_INCREMENT,
 department_name VARCHAR(30),
 PRIMARY KEY (id)
 )
+
