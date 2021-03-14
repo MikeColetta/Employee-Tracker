@@ -71,7 +71,7 @@ init();
 
 
 const viewAllEmp = () => {
-    connection.query('SELECT * FROM employee', (err, res) => {
+    connection.query('SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN role ON (employee.role_id = role.id) INNER JOIN department ON (role.department_id = department.id)', (err, res) => {
         if (err) throw err;
         console.table(res);
         init();
@@ -86,7 +86,7 @@ const viewAllDepts = () => {
 
 }
 const viewAllRoles = () => {
-    connection.query('SELECT * FROM role', (err, res) => {
+    connection.query('SELECT * FROM role INNER JOIN department ON (role.department_id = department.id)', (err, res) => {
         if (err) throw err;
         console.table(res);
         init();
@@ -116,8 +116,8 @@ const addEmp = () => {
                     res.forEach(({ fullRole }) => {
                         roleArray.push(fullRole)
                     });
+                    return roleArray
                 })
-                return roleArray;
             },
         },
         {
@@ -131,8 +131,8 @@ const addEmp = () => {
                     res.forEach(({ fullDept }) => {
                         deptArray.push(fullDept)
                     });
+                    return deptArray;
                 })
-                return deptArray;
             }
         }
     ]).then((answers) => {
@@ -221,7 +221,7 @@ const addRole = () => {
                     res.forEach(({ fullDept }) => {
                         deptChoice.push(fullDept)
                     });
-                    console.log(deptChoice)
+
                     return deptChoice;
                 },
             }
