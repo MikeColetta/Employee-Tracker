@@ -71,7 +71,7 @@ init();
 
 
 const viewAllEmp = () => {
-    connection.query('SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN role ON (employee.role_id = role.id) INNER JOIN department ON (role.department_id = department.id)', (err, res) => {
+    connection.query('SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.department_name FROM employee inner join role ON (employee.role_id = role.id) INNER JOIN department ON role.department_id = department.id', (err, res) => {
         if (err) throw err;
         console.table(res);
         init();
@@ -94,6 +94,8 @@ const viewAllRoles = () => {
 }
 
 const addEmp = () => {
+    connection.query('SELECT CONCAT(role.id, " - ", role.title) AS fullRole, CONCAT(department.id, " - ", department.department_name) AS fullDept FROM role INNER JOIN department ON (role.department_id = department.id)', (err, res) => {
+        if (err) throw err;
     inquirer.prompt([
         {
             name: 'firstName',
@@ -110,14 +112,11 @@ const addEmp = () => {
             type: 'list',
             message: 'What is their role?',
             choices() {
-                connection.query('SELECT CONCAT(id, " - ", title) AS fullRole FROM role', (err, res) => {
-                    if (err) throw err;
                     const roleArray = [];
                     res.forEach(({ fullRole }) => {
                         roleArray.push(fullRole)
                     });
                     return roleArray
-                })
             },
         },
         {
@@ -125,40 +124,39 @@ const addEmp = () => {
             type: 'list',
             message: 'What department are they in?',
             choices() {
-                connection.query('SELECT CONCAT(id, " - ", department_name) AS fullDept FROM department', (err, res) => {
-                    if (err) throw err;
                     const deptArray = [];
                     res.forEach(({ fullDept }) => {
                         deptArray.push(fullDept)
                     });
                     return deptArray;
-                })
             }
         }
-    ]).then((answers) => {
+    ]).then((answer) => {
+        let roleAnswer = answer.role.slice(0, 1)
+        let deptAnswer = answer.department.slice(0, 1)
         connection.query(
+            
             'INSERT INTO employee SET ?',
             {
-                first_name: answers.firstName,
-                last_name: answers.lastName,
-                role_id: answers.role,
-                manager_id: answers.manager
+                first_name: answer.firstName,
+                last_name: answer.lastName,
+                role_id: roleAnswer,
+                manager_id: deptAnswer,
             },
             (err, res) => {
                 if (err) throw err;
-                console.log(`${response.itemName} Item added to auction!\n`);
+                console.log(`Employee added!\n`);
                 init();
             }
         )
 
     })
-
+})
 }
 
 const remEmp = () => {
     connection.query('SELECT CONCAT(first_name, " ", last_name) AS fullName FROM employee', (err, res) => {
         if (err) throw err;
-        console.log(res)
         inquirer
             .prompt([
                 {
@@ -175,9 +173,7 @@ const remEmp = () => {
                 },
             ])
             .then((answer) => {
-                console.log(answer)
                 nameArray = answer.delEmp.split(" ")
-                console.log(nameArray)
                 console.log('Deleting employee...\n');
                 connection.query(
                     'DELETE FROM employee WHERE ?',
@@ -259,7 +255,6 @@ const remRole = () => {
                     res.forEach(({ fullRole }) => {
                         roleChoice.push(fullRole)
                     });
-                    console.log(roleChoice)
                     return roleChoice;
                 },
             }
@@ -277,7 +272,7 @@ const remRole = () => {
                 }
             )
         })
-})
+    })
 }
 
 const addDept = () => {
@@ -318,7 +313,6 @@ const remDept = () => {
                     res.forEach(({ fullDept }) => {
                         deptChoice.push(fullDept)
                     });
-                    console.log(deptChoice)
                     return deptChoice;
                 },
             }
@@ -336,18 +330,5 @@ const remDept = () => {
                 }
             )
         })
-})
+    })
 };
-
-// async function getDepts() {
-//     const departments = await connection.query('SELECT CONCAT(id, " - ", department_name) AS fullDept FROM department', (err, res) => {
-//         if (err) throw err;
-
-//         const deptChoice = [];
-//         res.forEach(({ fullDept }) => {
-//             deptChoice.push(fullDept)
-//         });
-//         console.log(deptChoice)
-//         return deptChoice;
-//     })
-// }
