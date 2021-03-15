@@ -155,7 +155,7 @@ const addEmp = () => {
 }
 
 const remEmp = () => {
-    connection.query('SELECT CONCAT(first_name, " ", last_name) AS fullName FROM employee', (err, res) => {
+    connection.query('SELECT CONCAT(first_name, " ", last_name, " - Employee ID: ", id) AS fullName FROM employee', (err, res) => {
         if (err) throw err;
         inquirer
             .prompt([
@@ -174,12 +174,12 @@ const remEmp = () => {
             ])
             .then((answer) => {
                 nameArray = answer.delEmp.split(" ")
+                console.log(nameArray)
                 console.log('Deleting employee...\n');
                 connection.query(
                     'DELETE FROM employee WHERE ?',
                     {
-                        first_name: nameArray[0],
-                        last_name: nameArray[1]
+                        id: nameArray[5],
                     },
                     (err, res) => {
                         if (err) {
