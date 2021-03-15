@@ -51,7 +51,7 @@ const init = () => {
                     addEmp();
                     break;
                 case 'Update Employee':
-                    updEmp();
+                    updEmpRole();
                     break;
                 case 'Remove Employee':
                     remEmp();
@@ -73,7 +73,7 @@ const init = () => {
                     break;
             }
         })
-}
+};
 
 init();
 
@@ -84,7 +84,8 @@ const viewAllEmp = () => {
         console.table(res);
         init();
     });
-}
+};
+
 const viewAllDepts = () => {
     connection.query('SELECT * FROM department', (err, res) => {
         if (err) throw err;
@@ -92,75 +93,139 @@ const viewAllDepts = () => {
         init();
     });
 
-}
+};
+
 const viewAllRoles = () => {
     connection.query('SELECT * FROM role INNER JOIN department ON (role.department_id = department.id)', (err, res) => {
         if (err) throw err;
         console.table(res);
         init();
     });
-}
+};
 
 const addEmp = () => {
     connection.query('SELECT CONCAT(role.id, " - ", role.title) AS fullRole, CONCAT(department.id, " - ", department.department_name) AS fullDept FROM role INNER JOIN department ON (role.department_id = department.id)', (err, res) => {
         if (err) throw err;
-    inquirer.prompt([
-        {
-            name: 'firstName',
-            type: 'input',
-            message: "What is the new employee's first name?"
-        },
-        {
-            name: 'lastName',
-            type: 'input',
-            message: 'What is their last name?'
-        },
-        {
-            name: 'role',
-            type: 'list',
-            message: 'What is their role?',
-            choices() {
-                    const roleArray = [];
-                    res.forEach(({ fullRole }) => {
-                        roleArray.push(fullRole)
-                    });
-                    return roleArray
-            },
-        },
-        {
-            name: 'department',
-            type: 'list',
-            message: 'What department are they in?',
-            choices() {
-                    const deptArray = [];
-                    res.forEach(({ fullDept }) => {
-                        deptArray.push(fullDept)
-                    });
-                    return deptArray;
-            }
-        }
-    ]).then((answer) => {
-        let roleAnswer = answer.role.slice(0, 1)
-        let deptAnswer = answer.department.slice(0, 1)
-        connection.query(
-            
-            'INSERT INTO employee SET ?',
-            {
-                first_name: answer.firstName,
-                last_name: answer.lastName,
-                role_id: roleAnswer,
-                manager_id: deptAnswer,
-            },
-            (err, res) => {
-                if (err) throw err;
-                console.log(`Employee added!\n`);
-                init();
-            }
-        )
+        inquirer
+            .prompt([
+                {
+                    name: 'firstName',
+                    type: 'input',
+                    message: "What is the new employee's first name?"
+                },
+                {
+                    name: 'lastName',
+                    type: 'input',
+                    message: 'What is their last name?'
+                },
+                {
+                    name: 'role',
+                    type: 'list',
+                    message: 'What is their role?',
+                    choices() {
+                        const roleArray = [];
+                        res.forEach(({ fullRole }) => {
+                            roleArray.push(fullRole)
+                        });
+                        return roleArray
+                    },
+                },
+                {
+                    name: 'department',
+                    type: 'list',
+                    message: 'What department are they in?',
+                    choices() {
+                        const deptArray = [];
+                        res.forEach(({ fullDept }) => {
+                            deptArray.push(fullDept)
+                        });
+                        return deptArray;
+                    }
+                }
+            ]).then((answer) => {
+                let roleAnswer = answer.role.slice(0, 1)
+                let deptAnswer = answer.department.slice(0, 1)
+                connection.query(
 
+                    'INSERT INTO employee SET ?',
+                    {
+                        first_name: answer.firstName,
+                        last_name: answer.lastName,
+                        role_id: roleAnswer,
+                        manager_id: deptAnswer,
+                    },
+                    (err, res) => {
+                        if (err) throw err;
+                        console.log(`Employee added!\n`);
+                        init();
+                    }
+                )
+
+            })
     })
-})
-}
+};
+
+const updEmpRole = () => {
+    connection.query('SELECT CONCAT(first_name, " ", last_name, " - Employee ID: ", employee.id, " - Role ID: ", role.id, " - ", role.title) AS fullName, CONCAT(role.id, " - ", role.title) AS fullRole FROM employee INNER JOIN role on (employee.role_id = role.id)', (err, res) => {
+        if (err) throw err;
+        inquirer
+            .prompt([
+                {
+                    name: 'empToUpdate',
+                    type: 'rawlist',
+                    choices() {
+                        const choiceArray = [];
+                        res.forEach(({ fullName }) => {
+                            choiceArray.push(fullName)
+                        });
+                        return choiceArray;
+                    },
+                    message: 'Which employee you would you like to update?',
+                },
+                {
+                    name: 'roleToAdd',
+                    type: 'rawlist',
+                    choices() {
+                        const choiceArray = [];
+                        res.forEach(({ fullRole }) => {
+                            if (!choiceArray.includes(fullRole)) {
+                                choiceArray.push(fullRole)
+                            }
+                        })
+                        return choiceArray;
+                    },
+                    message: 'Please select a new role for the employee.',
+                }
+            ])
+            .then((answer) => {
+                nameArray = answer.empToUpdate.split(" ")
+                console.log(nameArray[6]);
+                roleArray = answer.roleToAdd.split(" ")
+                console.log(roleArray[0]);
+
+                console.log('Updating employee role...\n');
+                connection.query(
+                    'UPDATE employee SET ? WHERE ?',
+                    [
+                        {
+                            role_id: roleArray[0]
+                        },
+                        {
+                            id: nameArray[5]
+                        }
+                    ],
+                    (err, res) => {
+                        if (err) {
+                            console.log('Employee not in database!')
+                            init();
+                        };
+                        console.log(`Employee role updated!\n`);
+                        init();
+                    }
+                )
+            })
+    })
+};
 
 const remEmp = () => {
     connection.query('SELECT CONCAT(first_name, " ", last_name, " - Employee ID: ", id) AS fullName FROM employee', (err, res) => {
@@ -182,7 +247,6 @@ const remEmp = () => {
             ])
             .then((answer) => {
                 nameArray = answer.delEmp.split(" ")
-                console.log(nameArray)
                 console.log('Deleting employee...\n');
                 connection.query(
                     'DELETE FROM employee WHERE ?',
@@ -200,143 +264,145 @@ const remEmp = () => {
                 )
             })
     })
-}
+};
+
 const addRole = () => {
     connection.query('SELECT CONCAT(id, " - ", department_name) AS fullDept FROM department', (err, res) => {
         if (err) throw err;
-
-        inquirer.prompt([
-            {
-                name: 'title',
-                type: 'input',
-                message: "What is the title of the new role?"
-            },
-            {
-                name: 'salary',
-                type: 'input',
-                message: 'What is their salary?'
-            },
-            {
-                name: 'department',
-                type: 'rawlist',
-                message: 'What department is this role in?',
-                choices() {
-                    const deptChoice = [];
-                    res.forEach(({ fullDept }) => {
-                        deptChoice.push(fullDept)
-                    });
-
-                    return deptChoice;
-                },
-            }
-        ]).then((answer) => {
-            let deptAnswer = answer.department.slice(0, 1)
-            connection.query(
-                'INSERT INTO role SET ?',
+        inquirer
+            .prompt([
                 {
-                    title: answer.title,
-                    salary: answer.salary,
-                    department_id: deptAnswer,
+                    name: 'title',
+                    type: 'input',
+                    message: "What is the title of the new role?"
                 },
-                (err, res) => {
-                    if (err) throw err;
-                    console.log(`Role added!\n`);
-                    init();
+                {
+                    name: 'salary',
+                    type: 'input',
+                    message: 'What is their salary?'
+                },
+                {
+                    name: 'department',
+                    type: 'rawlist',
+                    message: 'What department is this role in?',
+                    choices() {
+                        const deptChoice = [];
+                        res.forEach(({ fullDept }) => {
+                            deptChoice.push(fullDept)
+                        });
+
+                        return deptChoice;
+                    },
                 }
-            )
-        })
+            ]).then((answer) => {
+                let deptAnswer = answer.department.slice(0, 1)
+                connection.query(
+                    'INSERT INTO role SET ?',
+                    {
+                        title: answer.title,
+                        salary: answer.salary,
+                        department_id: deptAnswer,
+                    },
+                    (err, res) => {
+                        if (err) throw err;
+                        console.log(`Role added!\n`);
+                        init();
+                    }
+                )
+            })
 
     })
-}
+};
 
 const remRole = () => {
     connection.query('SELECT CONCAT(id, " - ", title) AS fullRole FROM role', (err, res) => {
         if (err) throw err;
-
-        inquirer.prompt([
-            {
-                name: 'role',
-                type: 'rawlist',
-                message: 'Which role would you like to remove?',
-                choices() {
-                    const roleChoice = [];
-                    res.forEach(({ fullRole }) => {
-                        roleChoice.push(fullRole)
-                    });
-                    return roleChoice;
-                },
-            }
-        ]).then((answer) => {
-            let roleAnswer = answer.role.slice(0, 1)
-            connection.query(
-                'DELETE FROM role WHERE ?',
+        inquirer
+            .prompt([
                 {
-                    id: roleAnswer,
+                    name: 'role',
+                    type: 'rawlist',
+                    message: 'Which role would you like to remove?',
+                    choices() {
+                        const roleChoice = [];
+                        res.forEach(({ fullRole }) => {
+                            roleChoice.push(fullRole)
+                        });
+                        return roleChoice;
+                    },
+                }
+            ]).then((answer) => {
+                let roleAnswer = answer.role.slice(0, 1)
+                connection.query(
+                    'DELETE FROM role WHERE ?',
+                    {
+                        id: roleAnswer,
+                    },
+                    (err, res) => {
+                        if (err) throw err;
+                        console.log(`Role deleted!\n`);
+                        init();
+                    }
+                )
+            })
+    })
+};
+
+const addDept = () => {
+    inquirer
+        .prompt([
+            {
+                name: 'departmentName',
+                type: 'input',
+                message: "What is the title of the new department?"
+            }
+        ]).then((answers) => {
+            let department = answers.departmentName;
+            connection.query(
+                'INSERT INTO department SET ?',
+                {
+                    department_name: department
                 },
                 (err, res) => {
                     if (err) throw err;
-                    console.log(`Role deleted!\n`);
+                    console.log(`Department added!\n`);
                     init();
                 }
             )
+
         })
-    })
-}
-
-const addDept = () => {
-    inquirer.prompt([
-        {
-            name: 'departmentName',
-            type: 'input',
-            message: "What is the title of the new department?"
-        }
-    ]).then((answers) => {
-        let department = answers.departmentName;
-        connection.query(
-            'INSERT INTO department SET ?',
-            {
-                department_name: department
-            },
-            (err, res) => {
-                if (err) throw err;
-                console.log(`Department added!\n`);
-                init();
-            }
-        )
-
-    })
-}
+};
 
 const remDept = () => {
     connection.query('SELECT CONCAT(id, " - ", department_name) AS fullDept FROM department', (err, res) => {
         if (err) throw err;
-
-        inquirer.prompt([
-            {
-                name: 'department',
-                type: 'rawlist',
-                message: 'Which department would you like to remove?',
-                choices() {
-                    const deptChoice = [];
-                    res.forEach(({ fullDept }) => {
-                        deptChoice.push(fullDept)
-                    });
-                    return deptChoice;
-                },
-            }
-        ]).then((answer) => {
-            let deptAnswer = answer.department.slice(0, 1)
-            connection.query(
-                'DELETE FROM department WHERE ?',
+        inquirer
+            .prompt([
                 {
-                    id: deptAnswer,
-                },
-                (err, res) => {
-                    if (err) throw err;
-                    console.log(`Department deleted!\n`);
-                    init();
+                    name: 'department',
+                    type: 'rawlist',
+                    message: 'Which department would you like to remove?',
+                    choices() {
+                        const deptChoice = [];
+                        res.forEach(({ fullDept }) => {
+                            deptChoice.push(fullDept)
+                        });
+                        return deptChoice;
+                    },
                 }
-            )
-        })
+            ]).then((answer) => {
+                let deptAnswer = answer.department.slice(0, 1)
+                connection.query(
+                    'DELETE FROM department WHERE ?',
+                    {
+                        id: deptAnswer,
+                    },
+                    (err, res) => {
+                        if (err) throw err;
+                        console.log(`Department deleted!\n`);
+                        init();
+                    }
+                )
+            })
     })
 };
