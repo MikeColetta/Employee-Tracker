@@ -28,11 +28,13 @@ const init = () => {
                 'View All Departments',
                 'View All Roles',
                 'Add Employee',
+                'Update Employee',
                 'Remove Employee',
                 'Add Role',
                 'Remove Role',
                 'Add Department',
                 'Remove Department',
+                'Exit'
             ]
         }).then((answer) => {
             switch (answer.startmenu) {
@@ -48,6 +50,9 @@ const init = () => {
                 case 'Add Employee':
                     addEmp();
                     break;
+                case 'Update Employee':
+                    updEmp();
+                    break;
                 case 'Remove Employee':
                     remEmp();
                     break;
@@ -62,6 +67,9 @@ const init = () => {
                     break;
                 case 'Remove Department':
                     remDept();
+                    break;
+                case 'Exit':
+                    connection.end();
                     break;
             }
         })
