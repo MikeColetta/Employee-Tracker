@@ -96,16 +96,26 @@ const viewAllEmp = () => {
 };
 
 const viewAllDepts = () => {
-    connection.query('SELECT * FROM department', (err, res) => {
+    connection.query('SELECT id AS ID, department_name AS Department FROM department', (err, res) => {
         if (err) throw err;
         console.table(res);
         init();
     });
-
 };
 
 const viewAllRoles = () => {
-    connection.query('SELECT * FROM role INNER JOIN department ON (role.department_id = department.id)', (err, res) => {
+    connection.query(
+        `SELECT 
+        role.id AS Employee_ID,
+        title AS Title, 
+        salary AS Salary, 
+        department_id AS Department_ID, 
+        department_name AS Department 
+        FROM role 
+        INNER JOIN department 
+        ON (role.department_id = department.id)`, 
+        
+        (err, res) => {
         if (err) throw err;
         console.table(res);
         init();
