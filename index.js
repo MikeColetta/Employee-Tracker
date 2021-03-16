@@ -106,7 +106,7 @@ const viewAllDepts = () => {
 const viewAllRoles = () => {
     connection.query(
         `SELECT 
-        role.id AS Employee_ID,
+        role.id AS Role_ID,
         title AS Title, 
         salary AS Salary, 
         department_id AS Department_ID, 
@@ -125,6 +125,8 @@ const viewAllRoles = () => {
 const addEmp = async () => {
     let getRole = await getRoleQuery();
     let getDept = await getDeptQuery();
+    let getManager = await getManagerQuery();
+    console.log(getManager)
 
     inquirer
         .prompt([
@@ -149,10 +151,16 @@ const addEmp = async () => {
                 type: 'list',
                 message: 'What department are they in?',
                 choices: getDept
+            },
+            {
+                name: 'manager',
+                type: 'list',
+                message: 'Who is their manager?',
+                choices: getManager
             }
         ]).then((answer) => {
             let roleArr = answer.role.split(" ")
-            let deptArr = answer.department.split(" ")
+            let manArr = answer.manager.split(" ")
             connection.query(
 
                 'INSERT INTO employee SET ?',
@@ -160,7 +168,7 @@ const addEmp = async () => {
                     first_name: answer.firstName,
                     last_name: answer.lastName,
                     role_id: roleArr[2],
-                    manager_id: deptArr[0],
+                    manager_id: manArr[1],
                 },
                 (err, res) => {
                     if (err) throw err;
@@ -445,6 +453,18 @@ const getDeptQuery = () => {
     })
 };
 
-// getDeptQuery();
+const getManagerQuery = () => {
+    return new Promise((resolve, reject) => {
+        connection.query(`SELECT CONCAT("Emp_ID: ", id, " - ", first_name, " ", last_name) AS Managers FROM employee WHERE role_id=1;`, (err, res) => {
+            if (err) reject(err);
+            let managerArr = [];
+            res.forEach(manager => {
+                managerArr.push(manager.Managers)
+            })
+            console.log(managerArr)
+            resolve(managerArr)
+        })
+    })
+}
 
 init();
