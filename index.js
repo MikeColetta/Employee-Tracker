@@ -1,7 +1,6 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql');
 const cTable = require('console.table');
-const { restoreDefaultPrompts } = require('inquirer');
 
 //mysql connection
 const connection = mysql.createConnection({
@@ -28,7 +27,7 @@ const init = () => {
                 'View All Departments',
                 'View All Roles',
                 'Add Employee',
-                'Update Employee',
+                'Update Employee Role',
                 'Remove Employee',
                 'Add Role',
                 'Remove Role',
@@ -50,7 +49,7 @@ const init = () => {
                 case 'Add Employee':
                     addEmp();
                     break;
-                case 'Update Employee':
+                case 'Update Employee Role':
                     updEmpRole();
                     break;
                 case 'Remove Employee':
@@ -75,11 +74,21 @@ const init = () => {
         })
 };
 
-init();
 
 
 const viewAllEmp = () => {
-    connection.query('SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.department_name FROM employee inner join role ON (employee.role_id = role.id) INNER JOIN department ON role.department_id = department.id', (err, res) => {
+    connection.query(
+        `SELECT 
+        employee.id AS ID, 
+        employee.first_name AS First, 
+        employee.last_name AS Last, 
+        role.title AS Title, 
+        role.salary AS Salary, 
+        department.department_name AS Department 
+        FROM employee INNER JOIN role 
+        ON (employee.role_id = role.id) 
+        INNER JOIN department ON role.department_id = department.id`,
+     (err, res) => {
         if (err) throw err;
         console.table(res);
         init();
@@ -103,128 +112,102 @@ const viewAllRoles = () => {
     });
 };
 
-const addEmp = () => {
-    connection.query('SELECT CONCAT(role.id, " - ", role.title) AS fullRole, CONCAT(department.id, " - ", department.department_name) AS fullDept FROM role INNER JOIN department ON (role.department_id = department.id)', (err, res) => {
-        if (err) throw err;
-        inquirer
-            .prompt([
+const addEmp = async () => {
+    let getRole = await getRoleQuery();
+    let getDept = await getDeptQuery();
+
+    inquirer
+        .prompt([
+            {
+                name: 'firstName',
+                type: 'input',
+                message: "What is the new employee's first name?"
+            },
+            {
+                name: 'lastName',
+                type: 'input',
+                message: 'What is their last name?'
+            },
+            {
+                name: 'role',
+                type: 'list',
+                message: 'What is their role?',
+                choices: getRole
+            },
+            {
+                name: 'department',
+                type: 'list',
+                message: 'What department are they in?',
+                choices: getDept
+            }
+        ]).then((answer) => {
+            let roleArr = answer.role.split(" ")
+            let deptArr = answer.department.split(" ")
+            connection.query(
+
+                'INSERT INTO employee SET ?',
                 {
-                    name: 'firstName',
-                    type: 'input',
-                    message: "What is the new employee's first name?"
+                    first_name: answer.firstName,
+                    last_name: answer.lastName,
+                    role_id: roleArr[2],
+                    manager_id: deptArr[0],
                 },
-                {
-                    name: 'lastName',
-                    type: 'input',
-                    message: 'What is their last name?'
-                },
-                {
-                    name: 'role',
-                    type: 'list',
-                    message: 'What is their role?',
-                    choices() {
-                        const roleArray = [];
-                        res.forEach(({ fullRole }) => {
-                            roleArray.push(fullRole)
-                        });
-                        return roleArray
-                    },
-                },
-                {
-                    name: 'department',
-                    type: 'list',
-                    message: 'What department are they in?',
-                    choices() {
-                        const deptArray = [];
-                        res.forEach(({ fullDept }) => {
-                            deptArray.push(fullDept)
-                        });
-                        return deptArray;
-                    }
+                (err, res) => {
+                    if (err) throw err;
+                    console.log(`Employee added!\n`);
+                    init();
                 }
-            ]).then((answer) => {
-                let roleAnswer = answer.role.slice(0, 1)
-                let deptAnswer = answer.department.slice(0, 1)
-                connection.query(
+            )
 
-                    'INSERT INTO employee SET ?',
-                    {
-                        first_name: answer.firstName,
-                        last_name: answer.lastName,
-                        role_id: roleAnswer,
-                        manager_id: deptAnswer,
-                    },
-                    (err, res) => {
-                        if (err) throw err;
-                        console.log(`Employee added!\n`);
-                        init();
-                    }
-                )
-
-            })
-    })
+        })
 };
 
-const updEmpRole = () => {
-    connection.query('SELECT CONCAT(first_name, " ", last_name, " - Employee ID: ", employee.id, " - Role ID: ", role.id, " - ", role.title) AS fullName, CONCAT(role.id, " - ", role.title) AS fullRole FROM employee INNER JOIN role on (employee.role_id = role.id)', (err, res) => {
-        if (err) throw err;
-        inquirer
-            .prompt([
-                {
-                    name: 'empToUpdate',
-                    type: 'rawlist',
-                    choices() {
-                        const choiceArray = [];
-                        res.forEach(({ fullName }) => {
-                            choiceArray.push(fullName)
-                        });
-                        return choiceArray;
-                    },
-                    message: 'Which employee you would you like to update?',
-                },
-                {
-                    name: 'roleToAdd',
-                    type: 'rawlist',
-                    choices() {
-                        const choiceArray = [];
-                        res.forEach(({ fullRole }) => {
-                            if (!choiceArray.includes(fullRole)) {
-                                choiceArray.push(fullRole)
-                            }
-                        })
-                        return choiceArray;
-                    },
-                    message: 'Please select a new role for the employee.',
-                }
-            ])
-            .then((answer) => {
-                nameArray = answer.empToUpdate.split(" ")
-                console.log(nameArray[6]);
-                roleArray = answer.roleToAdd.split(" ")
-                console.log(roleArray[0]);
+const updEmpRole = async () => {
+    let empQuery = await getEmpQuery();
+    let rolQuery = await getRoleQuery();
 
-                console.log('Updating employee role...\n');
-                connection.query(
-                    'UPDATE employee SET ? WHERE ?',
-                    [
-                        {
-                            role_id: roleArray[0]
-                        },
-                        {
-                            id: nameArray[5]
-                        }
-                    ],
-                    (err, res) => {
-                        if (err) {
-                            console.log('Employee not in database!')
-                            init();
-                        };
-                        console.log(`Employee role updated!\n`);
-                        init();
+    inquirer
+        .prompt([
+            {
+                name: 'empToUpdate',
+                type: 'rawlist',
+                choices: empQuery,
+                message: 'Which employee you would you like to update?',
+            },
+            {
+                name: 'roleToAdd',
+                type: 'rawlist',
+                choices: rolQuery,
+                message: 'Please select a new role for the employee.',
+            }
+        ])
+        .then((answer) => {
+            nameArray = answer.empToUpdate.split(" ")
+            console.log(nameArray[2]);
+            roleArray = answer.roleToAdd.split(" ")
+            console.log(roleArray[1]);
+
+            console.log('Updating employee role...\n');
+            connection.query(
+                'UPDATE employee SET ? WHERE ?',
+                [
+                    {
+                        role_id: roleArray[2]
+                    },
+                    {
+                        id: nameArray[1]
                     }
-                )
-            })
-    })
+                ],
+                (err, res) => {
+                    if (err) {
+                        console.log('Employee not in database!')
+                        init();
+                    };
+                    console.log(`Employee role updated!\n`);
+                    init();
+                }
+            )
+        })
 };
 
 const remEmp = () => {
@@ -406,3 +389,52 @@ const remDept = () => {
             })
     })
 };
+
+const getEmpQuery = () => {
+    return new Promise((resolve, reject) => {
+        connection.query(`SELECT CONCAT("ID: ", employee.id, " - ", first_name, " ", last_name, " - ", role.title) 
+        AS fullName FROM role RIGHT JOIN employee ON role.id = employee.role_id`,
+            (err, res) => {
+                if (err) reject(err);
+                let empArr = [];
+                res.forEach(employee => {
+                    empArr.push(employee.fullName)
+                })
+                // console.log(empArr)
+                resolve(empArr)
+            });
+    })
+
+};
+
+const getRoleQuery = () => {
+    return new Promise((resolve, reject) => {
+        connection.query('SELECT CONCAT("Role ID: ", id, " - ", title) AS fullRole FROM role', (err, res) => {
+            if (err) reject(err);
+            let rolArr = [];
+            res.forEach(role => {
+                rolArr.push(role.fullRole)
+            })
+            // console.log(rolArr)
+            resolve(rolArr)
+        });
+    })
+};
+
+const getDeptQuery = () => {
+    return new Promise((resolve, reject) => {
+        connection.query(`SELECT CONCAT(department.id, " - ", department.department_name) AS Department FROM
+         department`, (err, res) => {
+            if (err) reject(err);
+            let deptArr = [];
+            res.forEach(dept => {
+                deptArr.push(dept.Department)
+            })
+            resolve(deptArr)
+        })
+    })
+};
+
+// getDeptQuery();
+
+init();
