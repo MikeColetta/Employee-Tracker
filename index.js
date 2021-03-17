@@ -128,6 +128,7 @@ const addEmp = async () => {
     let getRole = await getRoleQuery();
     let getDept = await getDeptQuery();
     let getManager = await getManagerQuery();
+    console.log(getManager);
 
     inquirer
         .prompt([
@@ -465,7 +466,7 @@ const getManagerQuery = () => {
         connection.query(`SELECT CONCAT("Emp_ID: ", id, " - ", first_name, " ", last_name) AS Managers FROM employee WHERE role_id BETWEEN 1 AND 2`, (err, res) => {
             if (err) reject(err);
 
-            let managerArr = ["No manager"];
+            let managerArr = ["No_Manager"];
             res.forEach(manager => {
                 managerArr.push(manager.Managers)
             })
