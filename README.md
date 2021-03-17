@@ -19,7 +19,7 @@ I created a node.js CMS application that uses Inquirer and MySQL to add, update,
     
 ## Usage
 
-![Screenshot1](./Images/Screenshot1.JPG)
+![Screenshot1](./images/Screenshot1.JPG)
 
 ## License
     
