@@ -242,7 +242,7 @@ const remEmp = () => {
                     choices() {
                         const choiceArray = [];
                         res.forEach(({ fullName }) => {
-                            choiceArray.push(fullName)
+                            choiceArray.push(fullName);
                         });
                         return choiceArray;
                     },
@@ -259,7 +259,7 @@ const remEmp = () => {
                     },
                     (err, res) => {
                         if (err) {
-                            console.log('Employee not in database!')
+                            console.log('Employee not in database!');
                             init();
                         };
                         console.log(`Employee deleted!\n`);
@@ -293,7 +293,7 @@ const addRole = () => {
                     choices() {
                         const deptChoice = [];
                         res.forEach(({ fullDept }) => {
-                            deptChoice.push(fullDept)
+                            deptChoice.push(fullDept);
                         });
 
                         return deptChoice;
@@ -332,7 +332,7 @@ const remRole = () => {
                     choices() {
                         const roleChoice = [];
                         res.forEach(({ fullRole }) => {
-                            roleChoice.push(fullRole)
+                            roleChoice.push(fullRole);
                         });
                         return roleChoice;
                     },
@@ -393,7 +393,7 @@ const remDept = () => {
                     choices() {
                         const deptChoice = [];
                         res.forEach(({ fullDept }) => {
-                            deptChoice.push(fullDept)
+                            deptChoice.push(fullDept);
                         });
                         return deptChoice;
                     },
@@ -425,7 +425,7 @@ const getEmpQuery = () => {
                 if (err) reject(err);
                 let empArr = [];
                 res.forEach(employee => {
-                    empArr.push(employee.fullName)
+                    empArr.push(employee.fullName);
                 })
                 resolve(empArr)
             });
@@ -439,9 +439,9 @@ const getRoleQuery = () => {
             if (err) reject(err);
             let rolArr = [];
             res.forEach(role => {
-                rolArr.push(role.fullRole)
+                rolArr.push(role.fullRole);
             })
-            resolve(rolArr)
+            resolve(rolArr);
         });
     })
 };
@@ -453,9 +453,9 @@ const getDeptQuery = () => {
             if (err) reject(err);
             let deptArr = [];
             res.forEach(dept => {
-                deptArr.push(dept.Department)
+                deptArr.push(dept.Department);
             })
-            resolve(deptArr)
+            resolve(deptArr);
         })
     })
 };
@@ -467,9 +467,9 @@ const getManagerQuery = () => {
 
             let managerArr = ["No_Manager"];
             res.forEach(manager => {
-                managerArr.push(manager.Managers)
+                managerArr.push(manager.Managers);
             })
-            resolve(managerArr)
+            resolve(managerArr);
         })
     })
 }
