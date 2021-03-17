@@ -462,7 +462,7 @@ const getDeptQuery = () => {
 
 const getManagerQuery = () => {
     return new Promise((resolve, reject) => {
-        connection.query(`SELECT CONCAT("Emp_ID: ", id, " - ", first_name, " ", last_name) AS Managers FROM employee WHERE role_id=1;`, (err, res) => {
+        connection.query(`SELECT CONCAT("Emp_ID: ", id, " - ", first_name, " ", last_name) AS Managers FROM employee WHERE role_id BETWEEN 1 AND 2`, (err, res) => {
             if (err) reject(err);
 
             let managerArr = ["No manager"];
