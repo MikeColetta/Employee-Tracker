@@ -128,7 +128,6 @@ const addEmp = async () => {
     let getRole = await getRoleQuery();
     let getDept = await getDeptQuery();
     let getManager = await getManagerQuery();
-    console.log(getManager);
 
     inquirer
         .prompt([
