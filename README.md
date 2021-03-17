@@ -15,7 +15,7 @@ I created a node.js CMS application that uses Inquirer and MySQL to add, update,
     
 ## Installation
     
-![Demonstration Video]()
+[Demonstration Video](https://drive.google.com/file/d/1mUS_cayO7Z7sQOvr0NTPOEcmUVUzZ9pX/view?usp=sharing)
     
 ## Usage
 
