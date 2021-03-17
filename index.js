@@ -464,7 +464,8 @@ const getManagerQuery = () => {
     return new Promise((resolve, reject) => {
         connection.query(`SELECT CONCAT("Emp_ID: ", id, " - ", first_name, " ", last_name) AS Managers FROM employee WHERE role_id=1;`, (err, res) => {
             if (err) reject(err);
-            let managerArr = [];
+
+            let managerArr = ["No manager"];
             res.forEach(manager => {
                 managerArr.push(manager.Managers)
             })
