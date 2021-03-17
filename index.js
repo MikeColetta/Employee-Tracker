@@ -74,8 +74,7 @@ const init = () => {
         })
 };
 
-
-
+//View all employees
 const viewAllEmp = () => {
     connection.query(
         `SELECT 
@@ -88,13 +87,14 @@ const viewAllEmp = () => {
         FROM employee INNER JOIN role 
         ON (employee.role_id = role.id) 
         INNER JOIN department ON role.department_id = department.id`,
-     (err, res) => {
-        if (err) throw err;
-        console.table(res);
-        init();
-    });
+        (err, res) => {
+            if (err) throw err;
+            console.table(res);
+            init();
+        });
 };
 
+//View every department
 const viewAllDepts = () => {
     connection.query('SELECT id AS ID, department_name AS Department FROM department', (err, res) => {
         if (err) throw err;
@@ -103,6 +103,7 @@ const viewAllDepts = () => {
     });
 };
 
+//View every role
 const viewAllRoles = () => {
     connection.query(
         `SELECT 
@@ -113,15 +114,16 @@ const viewAllRoles = () => {
         department_name AS Department 
         FROM role 
         INNER JOIN department 
-        ON (role.department_id = department.id)`, 
-        
+        ON (role.department_id = department.id)`,
+
         (err, res) => {
-        if (err) throw err;
-        console.table(res);
-        init();
-    });
+            if (err) throw err;
+            console.table(res);
+            init();
+        });
 };
 
+//Adds an employee
 const addEmp = async () => {
     let getRole = await getRoleQuery();
     let getDept = await getDeptQuery();
@@ -179,6 +181,7 @@ const addEmp = async () => {
         })
 };
 
+//Updates an employee role
 const updEmpRole = async () => {
     let empQuery = await getEmpQuery();
     let rolQuery = await getRoleQuery();
@@ -200,9 +203,7 @@ const updEmpRole = async () => {
         ])
         .then((answer) => {
             nameArray = answer.empToUpdate.split(" ")
-            console.log(nameArray[2]);
             roleArray = answer.roleToAdd.split(" ")
-            console.log(roleArray[1]);
 
             console.log('Updating employee role...\n');
             connection.query(
@@ -227,6 +228,7 @@ const updEmpRole = async () => {
         })
 };
 
+//Deletes an employee
 const remEmp = () => {
     connection.query('SELECT CONCAT(first_name, " ", last_name, " - Employee ID: ", id) AS fullName FROM employee', (err, res) => {
         if (err) throw err;
@@ -266,6 +268,7 @@ const remEmp = () => {
     })
 };
 
+//Adds a role
 const addRole = () => {
     connection.query('SELECT CONCAT(id, " - ", department_name) AS fullDept FROM department', (err, res) => {
         if (err) throw err;
@@ -314,6 +317,7 @@ const addRole = () => {
     })
 };
 
+//Deletes a role
 const remRole = () => {
     connection.query('SELECT CONCAT(id, " - ", title) AS fullRole FROM role', (err, res) => {
         if (err) throw err;
@@ -348,6 +352,7 @@ const remRole = () => {
     })
 };
 
+//Adds a department
 const addDept = () => {
     inquirer
         .prompt([
@@ -373,6 +378,7 @@ const addDept = () => {
         })
 };
 
+//Deletes a department
 const remDept = () => {
     connection.query('SELECT CONCAT(id, " - ", department_name) AS fullDept FROM department', (err, res) => {
         if (err) throw err;
@@ -407,6 +413,8 @@ const remDept = () => {
     })
 };
 
+//General queries that get information from the MySQL table
+
 const getEmpQuery = () => {
     return new Promise((resolve, reject) => {
         connection.query(`SELECT CONCAT("ID: ", employee.id, " - ", first_name, " ", last_name, " - ", role.title) 
@@ -417,7 +425,6 @@ const getEmpQuery = () => {
                 res.forEach(employee => {
                     empArr.push(employee.fullName)
                 })
-                // console.log(empArr)
                 resolve(empArr)
             });
     })
@@ -432,7 +439,6 @@ const getRoleQuery = () => {
             res.forEach(role => {
                 rolArr.push(role.fullRole)
             })
-            // console.log(rolArr)
             resolve(rolArr)
         });
     })
@@ -460,7 +466,6 @@ const getManagerQuery = () => {
             res.forEach(manager => {
                 managerArr.push(manager.Managers)
             })
-            console.log(managerArr)
             resolve(managerArr)
         })
     })
