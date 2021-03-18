@@ -126,7 +126,6 @@ const viewAllRoles = () => {
 //Adds an employee
 const addEmp = async () => {
     let getRole = await getRoleQuery();
-    let getDept = await getDeptQuery();
     let getManager = await getManagerQuery();
 
     inquirer
@@ -435,20 +434,6 @@ const getRoleQuery = () => {
             })
             resolve(rolArr);
         });
-    })
-};
-
-const getDeptQuery = () => {
-    return new Promise((resolve, reject) => {
-        connection.query(`SELECT CONCAT(department.id, " - ", department.department_name) AS Department FROM
-         department`, (err, res) => {
-            if (err) reject(err);
-            let deptArr = [];
-            res.forEach(dept => {
-                deptArr.push(dept.Department);
-            })
-            resolve(deptArr);
-        })
     })
 };
 
