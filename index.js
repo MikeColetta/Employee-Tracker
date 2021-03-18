@@ -86,7 +86,7 @@ const viewAllEmp = () => {
         department.department_name AS Department 
         FROM employee INNER JOIN role 
         ON (employee.role_id = role.id) 
-        INNER JOIN department ON employee.dept_id = department.id`,
+        INNER JOIN department ON role.department_id = department.id`,
         (err, res) => {
             if (err) throw err;
             console.table(res);
@@ -148,12 +148,6 @@ const addEmp = async () => {
                 choices: getRole
             },
             {
-                name: 'department',
-                type: 'list',
-                message: 'What department are they in?',
-                choices: getDept
-            },
-            {
                 name: 'manager',
                 type: 'list',
                 message: 'Who is their manager?',
@@ -162,7 +156,6 @@ const addEmp = async () => {
         ]).then((answer) => {
             let roleArr = answer.role.split(" ");
             let manArr = answer.manager.split(" ");
-            let deptARR = answer.department.split(" ");
             connection.query(
 
                 'INSERT INTO employee SET ?',
@@ -170,7 +163,6 @@ const addEmp = async () => {
                     first_name: answer.firstName,
                     last_name: answer.lastName,
                     role_id: roleArr[2],
-                    dept_id: deptARR[0],
                     manager_id: manArr[1],
                 },
                 (err, res) => {
